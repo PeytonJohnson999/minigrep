@@ -24,9 +24,6 @@ fn main() -> io::Result<()>{
         None => panic!("MISSING FILE PATH"),
     };
 
-    // println!("args: {:?}", env::args());
-    println!("pattern: {pattern}");
-    println!("file path: {file_path}");
 
     let file = file_handler::get_file(file_path, true, false);
     let re = RegexBuilder::new(pattern).build().unwrap();
