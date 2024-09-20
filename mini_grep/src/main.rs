@@ -34,11 +34,16 @@ fn main() -> io::Result<()>{
     let re = re.build().unwrap();
     let mut reader = BufReader::new(&file);
     let matches = find_matches(&mut reader, &re, &options);
+
+    if matches.is_empty(){
+        println!("No matches found");
+        return Ok(())
+    }
      
     for (l, o, s) in matches{
         if options.b{
 
-            println!("Line: {l}, Start: {o}, Match: {s}");
+            println!("Line: {l}, Start: {o}, Match: \"{s}\"");
         }else{
 
             println!("Line: {l}, Match: {s}");
@@ -52,6 +57,9 @@ fn find_matches<'a>(reader: &mut BufReader<&File>, re: &regex::Regex, o: &Option
     let mut matches: Vec<(u32, u32, String)> = Vec::new();
     let mut current_line: u32 = 0;
     for line in reader.lines(){
+        if (matches.len() == o.m.1.try_into().unwrap() && o.m.0){
+            break;
+        }
         let line = line.unwrap().trim().to_string();
 
         current_line += 1;
@@ -83,6 +91,7 @@ fn find_matches<'a>(reader: &mut BufReader<&File>, re: &regex::Regex, o: &Option
                 None => (),
             }
         }
+        
     }
 
     matches

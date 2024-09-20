@@ -6,6 +6,7 @@ pub mod Options{
         pub v : bool,
         pub o : bool,
         pub b : bool,
+        pub m : (bool, u32),
     }
 
     impl Options{
@@ -16,6 +17,29 @@ pub mod Options{
                 v: Regex::new(r"-\w*v").unwrap().is_match(&args),
                 o: Regex::new(r"-\w*o").unwrap().is_match(&args),
                 b: Regex::new(r"-\w*b").unwrap().is_match(&args),
+                m: {
+                    
+                    let m = Regex::new(r"-\w*m").unwrap().find(&args);
+                    let mut enabled = false;
+                    let mut lines = 0;
+                    if m.is_some() {
+                        enabled = true;
+                        let m = m.unwrap();
+                        
+                        //Finding the beginning and end of the number
+                        let mut num = String::new();
+                        for ch in args[m.end()..].to_string().chars(){
+                            if (ch.is_digit(10)){
+                                num.push(ch);
+                            }else if ( num.len() > 0){
+                                break;
+                            }
+                        }
+                        lines = num.parse().expect("failed parsing -m num");
+                    }
+
+                    (enabled, lines)
+                }
             }
         }
     }
