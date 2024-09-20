@@ -1,13 +1,12 @@
-use std::{env, io::{self, Seek}, thread::current};
+use std::env;
 use crate::file::File as file_handler;
-use regex::{bytes, RegexBuilder};
-use std::io::{BufReader, Read, BufRead};
+use regex::RegexBuilder;
+use std::io::{BufReader, self, BufRead};
 use std::fs::File;
-use std::borrow::Borrow;
-use std::iter::Cloned;
-// use std::fs::File;
+use crate::options::Options;
 
 mod file;
+mod options;
 
 fn main() -> io::Result<()>{
     let args = env::args().collect::<Vec<String>>();
@@ -24,30 +23,68 @@ fn main() -> io::Result<()>{
         None => panic!("MISSING FILE PATH"),
     };
 
+    let options = Options::Options::options_from_args(args.clone());
+
 
     let file = file_handler::get_file(file_path, true, false);
-    let re = RegexBuilder::new(pattern).build().unwrap();
+    let mut re = RegexBuilder::new(pattern);
+    if options.i {
+        re.case_insensitive(true);
+    }
+    let re = re.build().unwrap();
     let mut reader = BufReader::new(&file);
-    let matches = find_matches(&mut reader, &re);
+    let matches = find_matches(&mut reader, &re, &options);
      
-    for (l, s) in matches{
-        println!("Line: {l}, Match: {s}");
+    for (l, o, s) in matches{
+        if options.b{
+
+            println!("Line: {l}, Start: {o}, Match: {s}");
+        }else{
+
+            println!("Line: {l}, Match: {s}");
+        }
     }
     
     Ok(())
 }
 
-fn find_matches<'a>(reader: &mut BufReader<&File>, re: &regex::Regex) ->  Vec<(u32, String)>{
-    let mut matches: Vec<(u32, String)> = Vec::new();
+fn find_matches<'a>(reader: &mut BufReader<&File>, re: &regex::Regex, o: &Options::Options) ->  Vec<(u32, u32, String)>{
+    let mut matches: Vec<(u32, u32, String)> = Vec::new();
     let mut current_line: u32 = 0;
     for line in reader.lines(){
+        let line = line.unwrap().trim().to_string();
 
         current_line += 1;
-        match re.find(&line.unwrap()){
-            Some(m)=> matches.push((current_line, m.as_str().to_owned())),
-            None => (),
+        if line.is_empty(){
+            continue;
+        }
+        
+        // If the option -v is enabled and the line is not empty print the entire line
+        if o.v{
+            match re.find(&line){
+                Some(_) => (),
+                None => {
+                    matches.push((current_line, 0, line))
+                },
+            }
+        // 
+        }else {
+            match re.find(&line){
+                Some(m) => {
+                    //print only the match
+                    if o.o{
+                        matches.push((current_line, (m.start() + 1) as u32, m.as_str().to_owned()))
+
+                    // print the entire line
+                    }else {
+                        matches.push((current_line, 0, line))
+                    }
+                },
+                None => (),
+            }
         }
     }
 
     matches
 }
+
