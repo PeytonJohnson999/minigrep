@@ -7,6 +7,7 @@ pub mod Options{
         pub o : bool,
         pub b : bool,
         pub m : (bool, u32),
+        pub w : bool,
     }
 
     impl Options{
@@ -39,7 +40,10 @@ pub mod Options{
                     }
 
                     (enabled, lines)
-                }
+                },
+                w: Regex::new(r"-\w*w").unwrap().is_match(&args),
+                
+
             }
         }
     }

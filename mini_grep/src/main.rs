@@ -1,12 +1,17 @@
 use std::env;
+use std::fmt::Error;
 use crate::file::File as file_handler;
+use directory::Directory;
 use regex::RegexBuilder;
 use std::io::{BufReader, self, BufRead};
 use std::fs::File;
 use crate::options::Options;
+use std::path::Path;
 
 mod file;
 mod options;
+mod directory;
+mod matches;
 
 fn main() -> io::Result<()>{
     let args = env::args().collect::<Vec<String>>();
@@ -17,21 +22,49 @@ fn main() -> io::Result<()>{
         None => panic!("MISSING PATTERN"),
     };
 
-    let binding = args.get(2);
-    let file_path = match &binding{
-        Some(path) => path,
-        None => panic!("MISSING FILE PATH"),
-    };
-
     let options = Options::Options::options_from_args(args.clone());
 
+    
 
-    let file = file_handler::get_file(file_path, true, false);
-    let mut re = RegexBuilder::new(pattern);
+    
+
+
+    let mut re: RegexBuilder;
+    if options.w {
+        re = RegexBuilder::new(format!(r"^({pattern})$").as_str());
+    }else{
+        re = RegexBuilder::new(pattern);
+    } 
     if options.i {
         re.case_insensitive(true);
     }
     let re = re.build().unwrap();
+
+    let binding = args.get(2);
+    let file_path = match &binding{
+        Some(path) => path,
+
+        //Handle it as a directory
+        None => {
+            let dir = env::current_dir()?;
+            let mut matches : Vec<(String, String)> = Vec::new();
+            Directory::visit_dirs(&dir, &re, &options, &mut matches)?;
+            if matches.is_empty(){
+                println!("No matches found");
+                return Ok(())
+            }
+
+            for (n, p) in matches{
+        
+                println!("File: {n}, Path: \"{p}\"");
+            }
+
+            return Ok(()); 
+        },
+    };
+
+
+    let file = file_handler::get_file(file_path, true, false);
     let mut reader = BufReader::new(&file);
     let matches = find_matches(&mut reader, &re, &options);
 
@@ -53,7 +86,7 @@ fn main() -> io::Result<()>{
     Ok(())
 }
 
-fn find_matches<'a>(reader: &mut BufReader<&File>, re: &regex::Regex, o: &Options::Options) ->  Vec<(u32, u32, String)>{
+fn find_matches(reader: &mut BufReader<&File>, re: &regex::Regex, o: &Options::Options) ->  Vec<(u32, u32, String)>{
     let mut matches: Vec<(u32, u32, String)> = Vec::new();
     let mut current_line: u32 = 0;
     for line in reader.lines(){
@@ -96,4 +129,6 @@ fn find_matches<'a>(reader: &mut BufReader<&File>, re: &regex::Regex, o: &Option
 
     matches
 }
+
+
 
