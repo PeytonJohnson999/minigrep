@@ -1,6 +1,6 @@
 pub mod Directory{
     use std::io;
-    use std::fs::{self, DirEntry};
+    use std::fs::{self};
     use std::path::Path;
     use crate::matches::Matches;
     use crate::options;
