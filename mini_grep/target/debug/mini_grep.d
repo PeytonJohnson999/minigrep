@@ -1,1 +1,0 @@
-/workspace/minigrep/mini_grep/target/debug/mini_grep: /workspace/minigrep/mini_grep/src/directory.rs /workspace/minigrep/mini_grep/src/file.rs /workspace/minigrep/mini_grep/src/main.rs /workspace/minigrep/mini_grep/src/matches.rs /workspace/minigrep/mini_grep/src/options.rs
