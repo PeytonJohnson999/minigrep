@@ -3,7 +3,7 @@ use crate::file::File as file_handler;
 use directory::Directory;
 use regex::RegexBuilder;
 use std::io::{BufReader, self};
-use crate::options::Options::Options;
+use crate::options::Options;
 use crate::matches::Matches;
 
 mod file;

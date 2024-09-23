@@ -3,9 +3,9 @@ pub mod Directory{
     use std::fs::{self};
     use std::path::Path;
     use crate::matches::Matches;
-    use crate::options;
+    use crate::options::Options;
 
-    pub fn visit_dirs(dir: &Path, re: &regex::Regex, o: &options::Options::Options,  matches : &mut Vec<(String, String)>) -> io::Result<()> {
+    pub fn visit_dirs(dir: &Path, re: &regex::Regex, o: &Options,  matches : &mut Vec<(String, String)>) -> io::Result<()> {
         if dir.is_dir() {
             for entry in fs::read_dir(dir)? {
                 let entry = entry?;

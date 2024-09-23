@@ -1,10 +1,10 @@
 pub mod Matches{
-    use crate::options::Options;
+    use crate::Options;
     use std::fs::DirEntry;
     use std::fs::File;
     use std::io::{BufReader, BufRead};
 
-    pub fn find_dirs(dir: &DirEntry, re: &regex::Regex, o: &Options::Options, matches : &mut Vec<(String, String)>) {
+    pub fn find_dirs(dir: &DirEntry, re: &regex::Regex, o: &Options, matches : &mut Vec<(String, String)>) {
         // let mut matches = Vec::new();
         let p = dir.path();
         if re.is_match(p.file_name().unwrap().to_str().unwrap()){
@@ -13,7 +13,7 @@ pub mod Matches{
     
     }
 
-    pub fn find_matches(reader: &mut BufReader<&File>, re: &regex::Regex, o: &Options::Options) ->  Vec<(u32, u32, String)>{
+    pub fn find_matches(reader: &mut BufReader<&File>, re: &regex::Regex, o: &Options) ->  Vec<(u32, u32, String)>{
         let mut matches: Vec<(u32, u32, String)> = Vec::new();
         let mut current_line: u32 = 0;
         for line in reader.lines(){
